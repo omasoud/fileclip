@@ -92,6 +92,7 @@ h1 {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   min-height: 28px;
   padding: 4px 10px;
   border-radius: 999px;
@@ -167,6 +168,11 @@ h1 {
   font-weight: 700;
 }
 
+.empty-icon .icon {
+  width: 21px;
+  height: 21px;
+}
+
 .empty-title {
   margin-top: 4px;
   color: var(--muted);
@@ -203,6 +209,11 @@ h1 {
   color: var(--muted);
   font-size: 0.66rem;
   font-weight: 750;
+}
+
+.file-icon .icon {
+  width: 22px;
+  height: 22px;
 }
 
 .file-text {
@@ -244,6 +255,7 @@ h1 {
 .file-direction {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -356,12 +368,28 @@ h1 {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  border: 1px solid currentColor;
-  font-size: 0.62rem;
-  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  stroke: currentColor;
+}
+
+.button-icon .icon {
+  width: 17px;
+  height: 17px;
+}
+
+.mode-badge .icon,
+.encoding-tag .icon,
+.file-direction .icon {
+  width: 13px;
+  height: 13px;
 }
 
 @media (prefers-color-scheme: dark) {

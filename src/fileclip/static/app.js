@@ -15,6 +15,29 @@
   const BASE64_CHUNK_SIZE = 0x8000;
   const textEncoder = new TextEncoder();
   const textDecoder = new TextDecoder("utf-8", { fatal: true });
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const ICONS = {
+    clipboard:
+      '<rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>',
+    copy:
+      '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>',
+    download:
+      '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line>',
+    file:
+      '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path>',
+    fileArchive:
+      '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 12v-1"></path><path d="M10 18v-2"></path><path d="M10 7V6"></path>',
+    fileText:
+      '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path>',
+    fileUp:
+      '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M12 12v6"></path><path d="m15 15-3-3-3 3"></path>',
+    image:
+      '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path>',
+    lock:
+      '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>',
+    lockOpen:
+      '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path>',
+  };
 
   class FileClipError extends Error {
     constructor(message) {
@@ -69,6 +92,35 @@
     els.pasteButton = requireElement("pasteButton");
     els.copyButton = requireElement("copyButton");
     els.downloadButton = requireElement("downloadButton");
+  }
+
+  function createIcon(name, className = "icon") {
+    const icon = document.createElementNS(SVG_NS, "svg");
+    icon.setAttribute("class", className);
+    icon.setAttribute("viewBox", "0 0 24 24");
+    icon.setAttribute("fill", "none");
+    icon.setAttribute("stroke", "currentColor");
+    icon.setAttribute("stroke-width", "2");
+    icon.setAttribute("stroke-linecap", "round");
+    icon.setAttribute("stroke-linejoin", "round");
+    icon.setAttribute("aria-hidden", "true");
+    icon.innerHTML = ICONS[name] || ICONS.file;
+    return icon;
+  }
+
+  function hydrateStaticIcons() {
+    document.querySelectorAll("[data-icon]").forEach((element) => {
+      element.replaceChildren(createIcon(element.dataset.icon || "file"));
+    });
+  }
+
+  function appendIconText(parent, className, iconName, text) {
+    const element = document.createElement("span");
+    element.className = className;
+    element.appendChild(createIcon(iconName));
+    element.appendChild(document.createTextNode(text));
+    parent.appendChild(element);
+    return element;
   }
 
   function hasRequiredApis() {
@@ -126,11 +178,40 @@
     return `${hash.slice(0, 8)}...${hash.slice(-6)}`;
   }
 
-  function currentEncodingLabel() {
+  function currentEncodingDetails() {
     if (state.config && state.config.mode === CONFIG_ENCRYPTED_MODE) {
-      return "encrypted - AES-GCM";
+      return { icon: "lock", text: "encrypted - AES-GCM" };
     }
-    return "plain - base64";
+    return { icon: "lockOpen", text: "plain - base64" };
+  }
+
+  function fileIconName(file) {
+    const mime = String(file.mime || "").toLowerCase();
+    const name = String(file.name || "").toLowerCase();
+    if (
+      mime.startsWith("image/") ||
+      /\.(avif|bmp|gif|jpe?g|png|svg|webp)$/.test(name)
+    ) {
+      return "image";
+    }
+    if (
+      mime.includes("zip") ||
+      mime.includes("archive") ||
+      mime.includes("gzip") ||
+      mime.includes("tar") ||
+      /\.(7z|gz|rar|tar|tgz|zip)$/.test(name)
+    ) {
+      return "fileArchive";
+    }
+    if (
+      mime.startsWith("text/") ||
+      mime.includes("json") ||
+      mime.includes("xml") ||
+      /\.(csv|json|log|md|txt|xml|yaml|yml)$/.test(name)
+    ) {
+      return "fileText";
+    }
+    return "file";
   }
 
   function renderEmptyZone() {
@@ -138,7 +219,10 @@
     els.dropZone.classList.add("is-empty");
     const empty = document.createElement("div");
     empty.className = "empty-zone";
-    appendTextElement(empty, "div", "empty-icon", "FILE");
+    const emptyIcon = document.createElement("div");
+    emptyIcon.className = "empty-icon";
+    emptyIcon.appendChild(createIcon("fileUp"));
+    empty.appendChild(emptyIcon);
     appendTextElement(empty, "div", "empty-title", "Drop one file here");
     appendTextElement(empty, "div", "empty-subtitle", "or choose a file from this browser");
     els.dropZone.replaceChildren(empty);
@@ -158,7 +242,10 @@
 
     const main = document.createElement("div");
     main.className = "file-card-main";
-    appendTextElement(main, "div", "file-icon", "FILE");
+    const fileIcon = document.createElement("div");
+    fileIcon.className = "file-icon";
+    fileIcon.appendChild(createIcon(fileIconName(file)));
+    main.appendChild(fileIcon);
 
     const text = document.createElement("div");
     text.className = "file-text";
@@ -180,7 +267,8 @@
 
     const stateRow = document.createElement("div");
     stateRow.className = "file-row";
-    appendTextElement(stateRow, "span", "encoding-tag", currentEncodingLabel());
+    const encoding = currentEncodingDetails();
+    appendIconText(stateRow, "encoding-tag", encoding.icon, encoding.text);
     appendTextElement(
       stateRow,
       "span",
@@ -766,12 +854,18 @@
     els.appVersion.textContent = `v${config.version}`;
     if (config.mode === CONFIG_ENCRYPTED_MODE) {
       els.modeBadge.className = "mode-badge mode-passphrase";
-      els.modeBadge.textContent = "Passphrase mode";
+      els.modeBadge.replaceChildren(
+        createIcon("lock"),
+        document.createTextNode("Passphrase mode"),
+      );
       els.modeSubtitle.textContent =
         "Files are encrypted in your browser before encoding. Envelopes only open with the matching passphrase.";
     } else {
       els.modeBadge.className = "mode-badge mode-plain";
-      els.modeBadge.textContent = "Plain mode";
+      els.modeBadge.replaceChildren(
+        createIcon("lockOpen"),
+        document.createTextNode("Plain mode"),
+      );
       els.modeSubtitle.textContent =
         "Files are base64-encoded into the envelope. No encryption - anyone with the text can rebuild the file.";
     }
@@ -807,6 +901,7 @@
 
   async function init() {
     collectElements();
+    hydrateStaticIcons();
     wireEvents();
     if (!hasRequiredApis()) {
       state.supported = false;

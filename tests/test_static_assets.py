@@ -16,6 +16,12 @@ def test_html_exposes_expected_controls() -> None:
     assert 'id="copyButton"' in html
     assert 'id="downloadButton"' in html
     assert 'id="fileName"' not in html
+    assert 'data-icon="clipboard"' in html
+    assert 'data-icon="copy"' in html
+    assert 'data-icon="download"' in html
+    assert ">P</span>" not in html
+    assert ">C</span>" not in html
+    assert ">D</span>" not in html
 
 
 def test_javascript_declares_envelope_contract() -> None:
@@ -47,3 +53,6 @@ def test_javascript_renders_adopted_file_card() -> None:
     assert "Passphrase mode" in javascript
     assert "plain - base64" in javascript
     assert "encrypted - AES-GCM" in javascript
+    assert "fileArchive" in javascript
+    assert "lockOpen" in javascript
+    assert "appendIconText" in javascript
