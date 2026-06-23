@@ -19,7 +19,41 @@ def test_cli_app_can_be_constructed() -> None:
     result = runner.invoke(app, ["--help"])
 
     assert result.exit_code == 0
-    assert "serve" in result.output
+    assert "--port" in result.output
+    assert "serve" not in result.output
+
+
+def test_root_command_runs_server_with_root_options(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[dict[str, object]] = []
+
+    def fake_run_local_server(**kwargs: object) -> None:
+        calls.append(kwargs)
+
+    monkeypatch.setattr("fileclip.cli.run_local_server", fake_run_local_server)
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8123",
+            "--no-open",
+            "--passphrase",
+            "secret",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert calls == [
+        {
+            "host": "127.0.0.1",
+            "port": 8123,
+            "open_browser": False,
+            "passphrase": "secret",
+            "passphrase_prompt": False,
+        }
+    ]
 
 
 @pytest.mark.parametrize("host", ["127.0.0.1", "localhost", "::1"])
@@ -34,7 +68,7 @@ def test_non_loopback_hosts_are_rejected(host: str) -> None:
 
 def test_remote_bind_is_rejected_by_cli() -> None:
     runner = CliRunner()
-    result = runner.invoke(app, ["serve", "--host", "0.0.0.0", "--no-open"])
+    result = runner.invoke(app, ["--host", "0.0.0.0", "--no-open"])
 
     assert result.exit_code != 0
 
@@ -47,13 +81,13 @@ def test_remote_bind_validation_message_is_clear() -> None:
 def test_port_zero_prebinds_socket_and_builds_actual_url() -> None:
     launch = prepare_server_launch("127.0.0.1", 0)
     try:
-      assert launch.requested_port == 0
-      assert launch.port > 0
-      assert launch.url == f"http://127.0.0.1:{launch.port}/"
-      assert launch.sockets is not None
-      assert isinstance(launch.sockets[0], socket.socket)
+        assert launch.requested_port == 0
+        assert launch.port > 0
+        assert launch.url == f"http://127.0.0.1:{launch.port}/"
+        assert launch.sockets is not None
+        assert isinstance(launch.sockets[0], socket.socket)
     finally:
-      close_sockets(launch.sockets)
+        close_sockets(launch.sockets)
 
 
 def test_explicit_port_does_not_prebind_socket() -> None:

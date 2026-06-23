@@ -20,13 +20,8 @@ DEFAULT_PORT = 0
 app = typer.Typer(
     add_completion=False,
     help="Run the local FileClip clipboard-envelope web app.",
-    no_args_is_help=True,
+    no_args_is_help=False,
 )
-
-
-@app.callback()
-def root() -> None:
-    """Run the local FileClip clipboard-envelope web app."""
 
 
 @dataclass(frozen=True)
@@ -191,7 +186,7 @@ def run_local_server(
 
 
 @app.command()
-def serve(
+def root(
     host: Annotated[
         str,
         typer.Option("--host", help="Loopback host to bind."),

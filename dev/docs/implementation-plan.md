@@ -26,7 +26,7 @@ Establish the package shape, dependency set, and test baseline before adding beh
 
 Implement the local launch command and make loopback-only operation the safe default.
 
-- [x] CLI-01 Add a `fileclip serve` Typer subcommand.
+- [x] CLI-01 Add a root `fileclip` command that starts the local browser app.
 - [x] CLI-02 Support `--host` with default `127.0.0.1`.
 - [x] CLI-03 Support `--port` with default `0` for automatic available-port selection.
 - [x] CLI-04 Support `--open / --no-open` with browser launch enabled by default.

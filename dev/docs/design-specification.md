@@ -21,7 +21,7 @@ The working name used in this specification is `fileclip`. The final package, co
 +----------------------------+
 | Python CLI                 |
 |                            |
-| fileclip serve             |
+| fileclip                   |
 | - parses options           |
 | - starts uvicorn/FastAPI   |
 | - optionally opens browser |
@@ -96,13 +96,13 @@ Responsibilities:
 ## 5. Suggested CLI
 
 ```bash
-fileclip serve
+fileclip
 ```
 
 Suggested options:
 
 ```bash
-fileclip serve \
+fileclip \
   --host 127.0.0.1 \
   --port 0 \
   --open \

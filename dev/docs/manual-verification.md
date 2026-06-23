@@ -2,7 +2,7 @@
 
 Use this checklist after automated tests pass.
 
-- [ ] Open `uv run fileclip serve` and confirm drop and paste are enabled while copy and download are disabled.
+- [ ] Open `uv run fileclip` and confirm drop and paste are enabled while copy and download are disabled.
 - [ ] Drop a small text file in plain mode and confirm filename, size, MIME type, and SHA-256 display.
 - [ ] Copy the plain envelope, paste it into another plain-mode instance, and download identical bytes.
 - [ ] Paste arbitrary clipboard text and confirm the existing loaded file, if any, is preserved.

@@ -7,7 +7,7 @@ FileClip does not sync clipboards, upload files, or store file contents on disk.
 ## Run
 
 ```bash
-uv run fileclip serve
+uv run fileclip
 ```
 
 By default the server binds to `127.0.0.1`, chooses an available port, and opens the browser.
@@ -15,9 +15,9 @@ By default the server binds to `127.0.0.1`, chooses an available port, and opens
 Useful options:
 
 ```bash
-uv run fileclip serve --port 8080
-uv run fileclip serve --no-open
-uv run fileclip serve --passphrase-prompt
+uv run fileclip --port 8080
+uv run fileclip --no-open
+uv run fileclip --passphrase-prompt
 ```
 
 ## Plain Mode
