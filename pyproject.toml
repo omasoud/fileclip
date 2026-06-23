@@ -1,6 +1,6 @@
 [project]
 name = "fileclip"
-version = "0.1.0"
+version = "1.0.0"
 description = "Local clipboard-envelope file transfer helper"
 readme = "README.md"
 authors = [
@@ -10,7 +10,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 keywords = ["clipboard", "file-transfer", "fastapi", "local-web-app"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
     "Framework :: FastAPI",
     "Intended Audience :: End Users/Desktop",
