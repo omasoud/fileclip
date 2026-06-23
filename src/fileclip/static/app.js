@@ -59,14 +59,12 @@
   }
 
   function collectElements() {
-    els.shell = document.querySelector(".app-shell");
-    els.modeLabel = requireElement("modeLabel");
+    els.shell = document.querySelector(".page-shell");
+    els.appVersion = requireElement("appVersion");
+    els.modeBadge = requireElement("modeBadge");
+    els.modeSubtitle = requireElement("modeSubtitle");
     els.dropZone = requireElement("dropZone");
     els.fileInput = requireElement("fileInput");
-    els.fileName = requireElement("fileName");
-    els.fileSize = requireElement("fileSize");
-    els.fileMime = requireElement("fileMime");
-    els.fileHash = requireElement("fileHash");
     els.status = requireElement("status");
     els.pasteButton = requireElement("pasteButton");
     els.copyButton = requireElement("copyButton");
@@ -111,25 +109,93 @@
     els.dropZone.setAttribute("aria-disabled", String(!canUse));
   }
 
-  function renderLoadedFile() {
+  function appendTextElement(parent, tagName, className, text) {
+    const element = document.createElement(tagName);
+    if (className) {
+      element.className = className;
+    }
+    element.textContent = text;
+    parent.appendChild(element);
+    return element;
+  }
+
+  function shortHash(hash) {
+    if (typeof hash !== "string" || hash.length <= 16) {
+      return hash || "-";
+    }
+    return `${hash.slice(0, 8)}...${hash.slice(-6)}`;
+  }
+
+  function currentEncodingLabel() {
+    if (state.config && state.config.mode === CONFIG_ENCRYPTED_MODE) {
+      return "encrypted - AES-GCM";
+    }
+    return "plain - base64";
+  }
+
+  function renderEmptyZone() {
+    els.dropZone.classList.remove("is-loaded");
+    els.dropZone.classList.add("is-empty");
+    const empty = document.createElement("div");
+    empty.className = "empty-zone";
+    appendTextElement(empty, "div", "empty-icon", "FILE");
+    appendTextElement(empty, "div", "empty-title", "Drop one file here");
+    appendTextElement(empty, "div", "empty-subtitle", "or choose a file from this browser");
+    els.dropZone.replaceChildren(empty);
+  }
+
+  function renderFileZone() {
     if (!state.loaded) {
-      els.fileName.textContent = "None";
-      els.fileSize.textContent = "-";
-      els.fileMime.textContent = "-";
-      els.fileHash.textContent = "-";
+      renderEmptyZone();
       return;
     }
     const file = state.loaded.file;
-    els.fileName.textContent = file.name || "(unnamed)";
-    els.fileSize.textContent = formatBytes(file.size);
-    els.fileMime.textContent = file.mime || DEFAULT_MIME;
-    els.fileHash.textContent = file.sha256;
+    els.dropZone.classList.remove("is-empty");
+    els.dropZone.classList.add("is-loaded");
+
+    const card = document.createElement("div");
+    card.className = "file-card";
+
+    const main = document.createElement("div");
+    main.className = "file-card-main";
+    appendTextElement(main, "div", "file-icon", "FILE");
+
+    const text = document.createElement("div");
+    text.className = "file-text";
+    appendTextElement(text, "div", "file-name", file.name || "(unnamed)");
+    appendTextElement(
+      text,
+      "div",
+      "file-meta",
+      `${formatBytes(file.size)} - ${file.mime || DEFAULT_MIME}`,
+    );
+    main.appendChild(text);
+    card.appendChild(main);
+
+    const hashRow = document.createElement("div");
+    hashRow.className = "file-row file-row-mono";
+    appendTextElement(hashRow, "span", "", "sha256");
+    appendTextElement(hashRow, "span", "", shortHash(file.sha256));
+    card.appendChild(hashRow);
+
+    const stateRow = document.createElement("div");
+    stateRow.className = "file-row";
+    appendTextElement(stateRow, "span", "encoding-tag", currentEncodingLabel());
+    appendTextElement(
+      stateRow,
+      "span",
+      "file-direction",
+      state.loaded.source === "paste" ? "verified - ready to download" : "ready to copy",
+    );
+    card.appendChild(stateRow);
+
+    els.dropZone.replaceChildren(card);
   }
 
   function setLoaded(loaded, statusMessage) {
     revokeObjectUrl();
     state.loaded = loaded;
-    renderLoadedFile();
+    renderFileZone();
     renderControls();
     setStatus(statusMessage, "success");
   }
@@ -613,7 +679,7 @@
       await nextFrame();
       await navigator.clipboard.writeText(envelope);
       state.loaded.envelope = envelope;
-      setStatus("Copied to local clipboard.", "success");
+      setStatus("Copied envelope to local clipboard.", "success");
     } catch (_error) {
       preserveStateError(messages.clipboardWrite);
     } finally {
@@ -684,6 +750,7 @@
     const config = await response.json();
     if (
       config.app !== "fileclip" ||
+      typeof config.version !== "string" ||
       config.schema !== SCHEMA ||
       ![CONFIG_PLAIN_MODE, CONFIG_ENCRYPTED_MODE].includes(config.mode)
     ) {
@@ -696,8 +763,18 @@
       throw new Error("Plain mode must not include a passphrase.");
     }
     state.config = config;
-    els.modeLabel.textContent =
-      config.mode === CONFIG_ENCRYPTED_MODE ? "Mode: Passphrase" : "Mode: Plain";
+    els.appVersion.textContent = `v${config.version}`;
+    if (config.mode === CONFIG_ENCRYPTED_MODE) {
+      els.modeBadge.className = "mode-badge mode-passphrase";
+      els.modeBadge.textContent = "Passphrase mode";
+      els.modeSubtitle.textContent =
+        "Files are encrypted in your browser before encoding. Envelopes only open with the matching passphrase.";
+    } else {
+      els.modeBadge.className = "mode-badge mode-plain";
+      els.modeBadge.textContent = "Plain mode";
+      els.modeSubtitle.textContent =
+        "Files are base64-encoded into the envelope. No encryption - anyone with the text can rebuild the file.";
+    }
   }
 
   function wireEvents() {
@@ -733,7 +810,9 @@
     wireEvents();
     if (!hasRequiredApis()) {
       state.supported = false;
-      els.modeLabel.textContent = "Mode: Unsupported";
+      els.modeBadge.className = "mode-badge mode-unsupported";
+      els.modeBadge.textContent = "Unsupported";
+      els.modeSubtitle.textContent = "This browser is missing an API FileClip needs.";
       renderControls();
       setStatus(messages.unsupportedBrowser, "error");
       return;
@@ -741,7 +820,7 @@
     try {
       await loadConfig();
       state.supported = true;
-      renderLoadedFile();
+      renderFileZone();
       renderControls();
       setStatus("Ready.", "neutral");
     } catch (error) {

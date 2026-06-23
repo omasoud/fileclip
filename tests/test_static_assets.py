@@ -8,10 +8,14 @@ def read_static_asset(name: str) -> str:
 def test_html_exposes_expected_controls() -> None:
     html = read_static_asset("index.html")
 
+    assert 'id="appVersion"' in html
+    assert 'id="modeBadge"' in html
+    assert 'id="modeSubtitle"' in html
     assert 'id="dropZone"' in html
     assert 'id="pasteButton"' in html
     assert 'id="copyButton"' in html
     assert 'id="downloadButton"' in html
+    assert 'id="fileName"' not in html
 
 
 def test_javascript_declares_envelope_contract() -> None:
@@ -28,7 +32,18 @@ def test_javascript_declares_envelope_contract() -> None:
 def test_javascript_includes_required_user_messages() -> None:
     javascript = read_static_asset("app.js")
 
-    assert "Copied to local clipboard." in javascript
+    assert "Copied envelope to local clipboard." in javascript
     assert "Drop one file at a time." in javascript
     assert "application/octet-stream" in javascript
     assert "Clipboard payload mode does not match this app instance." in javascript
+
+
+def test_javascript_renders_adopted_file_card() -> None:
+    javascript = read_static_asset("app.js")
+
+    assert "renderFileZone" in javascript
+    assert "file-card" in javascript
+    assert "mode-passphrase" in javascript
+    assert "Passphrase mode" in javascript
+    assert "plain - base64" in javascript
+    assert "encrypted - AES-GCM" in javascript

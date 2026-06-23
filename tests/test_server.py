@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from fileclip import __version__
 from fileclip.server import LaunchConfig, create_app
 
 
@@ -29,7 +30,12 @@ def test_plain_config_is_served_without_passphrase() -> None:
 
     assert response.status_code == 200
     assert response.headers["cache-control"] == "no-store"
-    assert response.json() == {"app": "fileclip", "schema": 1, "mode": "plain"}
+    assert response.json() == {
+        "app": "fileclip",
+        "version": __version__,
+        "schema": 1,
+        "mode": "plain",
+    }
 
 
 def test_encrypted_config_contains_passphrase_and_is_not_cacheable() -> None:
@@ -41,6 +47,7 @@ def test_encrypted_config_contains_passphrase_and_is_not_cacheable() -> None:
     assert response.headers["cache-control"] == "no-store"
     assert response.json() == {
         "app": "fileclip",
+        "version": __version__,
         "schema": 1,
         "mode": "encrypted",
         "passphrase": "secret",

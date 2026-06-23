@@ -10,6 +10,8 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from fileclip import __version__
+
 APP_NAME = "fileclip"
 SCHEMA_VERSION = 1
 PLAIN_MODE = "plain"
@@ -24,6 +26,7 @@ class LaunchConfig:
     passphrase: str | None = None
     app_name: str = APP_NAME
     schema: int = SCHEMA_VERSION
+    version: str = __version__
 
     @property
     def mode(self) -> str:
@@ -38,6 +41,7 @@ class LaunchConfig:
 
         config: dict[str, Any] = {
             "app": self.app_name,
+            "version": self.version,
             "schema": self.schema,
             "mode": self.mode,
         }

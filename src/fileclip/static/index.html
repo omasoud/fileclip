@@ -7,54 +7,48 @@
     <link rel="stylesheet" href="/static/app.css">
   </head>
   <body>
-    <main class="app-shell" aria-busy="false">
-      <header class="app-header">
-        <div>
-          <h1>FileClip</h1>
-          <p class="subtitle">Clipboard envelope file transfer</p>
-        </div>
-        <div class="mode" id="modeLabel">Mode: Loading</div>
-      </header>
+    <main class="page-shell" aria-busy="false">
+      <section class="app-card" aria-labelledby="appTitle">
+        <header class="app-header">
+          <div class="title-group">
+            <div class="title-row">
+              <h1 id="appTitle">FileClip</h1>
+              <span class="version" id="appVersion">v...</span>
+            </div>
+            <p class="mode-subtitle" id="modeSubtitle">Loading launch configuration.</p>
+          </div>
+          <div class="mode-badge mode-loading" id="modeBadge">Loading</div>
+        </header>
 
-      <section
-        class="drop-zone"
-        id="dropZone"
-        role="button"
-        tabindex="0"
-        aria-label="Drop one file here"
-      >
         <input id="fileInput" type="file" hidden>
-        <strong>Drop one file here</strong>
-        <span>or choose a file from this browser</span>
-      </section>
+        <section
+          class="file-zone is-empty"
+          id="dropZone"
+          role="button"
+          tabindex="0"
+          aria-label="Drop one file here or choose a file"
+        ></section>
 
-      <section class="details" aria-live="polite">
-        <div>
-          <span class="label">File</span>
-          <span id="fileName">None</span>
-        </div>
-        <div>
-          <span class="label">Size</span>
-          <span id="fileSize">-</span>
-        </div>
-        <div>
-          <span class="label">MIME</span>
-          <span id="fileMime">-</span>
-        </div>
-        <div>
-          <span class="label">SHA-256</span>
-          <span id="fileHash">-</span>
-        </div>
-      </section>
+        <section class="status status-neutral" id="status" role="status" aria-live="polite">
+          Loading FileClip...
+        </section>
 
-      <section class="status status-neutral" id="status" role="status" aria-live="polite">
-        Loading FileClip...
-      </section>
-
-      <section class="actions" aria-label="FileClip actions">
-        <button type="button" id="pasteButton">Paste from clipboard</button>
-        <button type="button" id="copyButton" disabled>Copy to clipboard</button>
-        <button type="button" id="downloadButton" disabled>Download file</button>
+        <section class="actions" aria-label="FileClip actions">
+          <div class="primary-actions">
+            <button type="button" class="action-button" id="pasteButton">
+              <span class="button-icon" aria-hidden="true">P</span>
+              <span>Paste from clipboard</span>
+            </button>
+            <button type="button" class="action-button action-accent" id="copyButton" disabled>
+              <span class="button-icon" aria-hidden="true">C</span>
+              <span>Copy to clipboard</span>
+            </button>
+          </div>
+          <button type="button" class="action-button action-download" id="downloadButton" disabled>
+            <span class="button-icon" aria-hidden="true">D</span>
+            <span>Download file</span>
+          </button>
+        </section>
       </section>
     </main>
 
