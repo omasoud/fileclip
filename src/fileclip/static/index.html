@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FileClip</title>
+    <link rel="stylesheet" href="/static/app.css">
+  </head>
+  <body>
+    <main class="app-shell" aria-busy="false">
+      <header class="app-header">
+        <div>
+          <h1>FileClip</h1>
+          <p class="subtitle">Clipboard envelope file transfer</p>
+        </div>
+        <div class="mode" id="modeLabel">Mode: Loading</div>
+      </header>
+
+      <section
+        class="drop-zone"
+        id="dropZone"
+        role="button"
+        tabindex="0"
+        aria-label="Drop one file here"
+      >
+        <input id="fileInput" type="file" hidden>
+        <strong>Drop one file here</strong>
+        <span>or choose a file from this browser</span>
+      </section>
+
+      <section class="details" aria-live="polite">
+        <div>
+          <span class="label">File</span>
+          <span id="fileName">None</span>
+        </div>
+        <div>
+          <span class="label">Size</span>
+          <span id="fileSize">-</span>
+        </div>
+        <div>
+          <span class="label">MIME</span>
+          <span id="fileMime">-</span>
+        </div>
+        <div>
+          <span class="label">SHA-256</span>
+          <span id="fileHash">-</span>
+        </div>
+      </section>
+
+      <section class="status status-neutral" id="status" role="status" aria-live="polite">
+        Loading FileClip...
+      </section>
+
+      <section class="actions" aria-label="FileClip actions">
+        <button type="button" id="pasteButton">Paste from clipboard</button>
+        <button type="button" id="copyButton" disabled>Copy to clipboard</button>
+        <button type="button" id="downloadButton" disabled>Download file</button>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
