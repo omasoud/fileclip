@@ -4,7 +4,19 @@ version = "0.1.0"
 description = "Local clipboard-envelope file transfer helper"
 readme = "README.md"
 authors = [
-    { name = "omasoud", email = "osama.masoud@gmail.com" }
+    { name = "Osama Masoud", email = "osama.masoud@gmail.com" }
+]
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["clipboard", "file-transfer", "fastapi", "local-web-app"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Framework :: FastAPI",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Utilities",
 ]
 requires-python = ">=3.14"
 dependencies = [
@@ -15,6 +27,11 @@ dependencies = [
 
 [project.scripts]
 fileclip = "fileclip.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/omasoud/fileclip"
+Repository = "https://github.com/omasoud/fileclip"
+Issues = "https://github.com/omasoud/fileclip/issues"
 
 [build-system]
 requires = ["uv_build>=0.9.18,<0.12.0"]

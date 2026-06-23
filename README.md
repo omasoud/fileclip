@@ -4,10 +4,24 @@ FileClip is a small local web app for moving one file through text clipboard syn
 
 FileClip does not sync clipboards, upload files, or store file contents on disk. It assumes another system already syncs clipboard text between the environments you care about.
 
+## Install
+
+For CLI use:
+
+```bash
+uv tool install fileclip
+```
+
+Or with pipx:
+
+```bash
+pipx install fileclip
+```
+
 ## Run
 
 ```bash
-uv run fileclip
+fileclip
 ```
 
 By default the server binds to `127.0.0.1`, chooses an available port, and opens the browser.
@@ -15,9 +29,9 @@ By default the server binds to `127.0.0.1`, chooses an available port, and opens
 Useful options:
 
 ```bash
-uv run fileclip --port 8080
-uv run fileclip --no-open
-uv run fileclip --passphrase-prompt
+fileclip --port 8080
+fileclip --no-open
+fileclip --passphrase-prompt
 ```
 
 ## Plain Mode
@@ -37,3 +51,15 @@ Encrypted mode protects payload bytes but does not hide envelope metadata such a
 FileClip has no artificial file-size limit, but browsers, clipboards, clipboard managers, and external clipboard-sync channels do. Large payloads may fail to copy, paste, or sync.
 
 Only schema `1` envelopes are supported. FileClip intentionally rejects unknown schema versions and mode mismatches.
+
+## Development
+
+```bash
+uv sync
+uv run pytest
+uv run fileclip --no-open
+```
+
+## License
+
+FileClip is distributed under the MIT License.
