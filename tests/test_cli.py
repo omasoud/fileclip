@@ -19,7 +19,7 @@ def test_cli_app_can_be_constructed() -> None:
     result = runner.invoke(app, ["--help"])
 
     assert result.exit_code == 0
-    assert "--port" in result.output
+    assert "Start the local FileClip browser app." in result.output
     assert "serve" not in result.output
 
 
