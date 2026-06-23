@@ -1,0 +1,18 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Agentic session history
+dev/sessions
+# Copilot instructions are ignored but you can un-ignore them if you want them to be part of the repo
+.github/copilot-instructions.md
+# Local files and scratch work
+local/
+dev/docs/requirements.md

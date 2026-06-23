@@ -1,0 +1,28 @@
+[project]
+name = "fileclip"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "omasoud", email = "osama.masoud@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "typer>=0.26.7",
+]
+
+[project.scripts]
+fileclip = "fileclip:main"
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+exclude-newer = "2 days" # Exclude packages released in the last 2 days as a protection against undiscovered supply chain vulnerabilities.
+
+[dependency-groups]
+dev = [
+    "packaging>=26.2",
+    "pytest>=9.1.1",
+]
