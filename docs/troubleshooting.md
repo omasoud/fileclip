@@ -12,6 +12,8 @@ FileClip requires modern browser support for File, Blob URL, Clipboard, and Web 
 
 FileClip does not set a fixed file-size cap. A transfer can still fail because the browser, clipboard, clipboard manager, or external clipboard-sync path cannot handle the generated text envelope. Try a smaller archive or a different sync path.
 
+On Chromium for Windows, very large text envelopes may copy into the Windows clipboard but read back to browser JavaScript as empty text. This has been observed at `134,217,728` clipboard characters and above, which can affect raw files around 100 MiB because base64 expands file bytes by about one third.
+
 ## Passphrase Mismatch
 
 Encrypted envelopes can only be hydrated by an app instance launched with the same passphrase. A wrong passphrase, modified encrypted payload, or modified protected metadata is reported as a decryption refusal.

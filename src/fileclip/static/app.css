@@ -308,6 +308,10 @@ h1 {
   color: var(--warning-text);
 }
 
+.status-warning {
+  color: var(--warning-text);
+}
+
 .actions {
   display: grid;
   gap: 10px;

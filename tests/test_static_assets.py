@@ -42,6 +42,17 @@ def test_javascript_includes_required_user_messages() -> None:
     assert "Drop one file at a time." in javascript
     assert "application/octet-stream" in javascript
     assert "Clipboard payload mode does not match this app instance." in javascript
+    assert "Clipboard text is empty or unreadable." in javascript
+    assert "browser may not be able to paste text this large" in javascript
+
+
+def test_copy_reuses_loaded_envelope_before_rebuilding() -> None:
+    javascript = read_static_asset("app.js")
+
+    assert "const BROWSER_TEXT_CLIPBOARD_READ_LIMIT_CHARS = 0x8000000;" in javascript
+    assert "let envelope = state.loaded.envelope;" in javascript
+    assert "if (!envelope) {" in javascript
+    assert "envelope = await buildEnvelope(state.loaded.bytes, state.loaded.file);" in javascript
 
 
 def test_javascript_renders_adopted_file_card() -> None:

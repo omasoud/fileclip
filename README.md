@@ -48,7 +48,7 @@ Encrypted mode protects payload bytes but does not hide envelope metadata such a
 
 ## Limits
 
-FileClip has no artificial file-size limit, but browsers, clipboards, clipboard managers, and external clipboard-sync channels do. Large payloads may fail to copy, paste, or sync.
+FileClip has no artificial file-size limit, but browsers, clipboards, clipboard managers, and external clipboard-sync channels do. Large payloads may fail to copy, paste, or sync. Chromium on Windows has been observed to read very large text envelopes back as empty text at roughly 128 MiB of clipboard text.
 
 Only schema `1` envelopes are supported. FileClip intentionally rejects unknown schema versions and mode mismatches.
 

@@ -13,6 +13,7 @@
   const SALT_BYTES = 16;
   const IV_BYTES = 12;
   const BASE64_CHUNK_SIZE = 0x8000;
+  const BROWSER_TEXT_CLIPBOARD_READ_LIMIT_CHARS = 0x8000000;
   const textEncoder = new TextEncoder();
   const textDecoder = new TextDecoder("utf-8", { fatal: true });
   const SVG_NS = "http://www.w3.org/2000/svg";
@@ -57,6 +58,10 @@
       "Clipboard payload is valid, but cannot be decrypted with this instance's passphrase.",
     hashMismatch: "Decoded file failed integrity verification.",
     sizeMismatch: "Decoded file size does not match the envelope metadata.",
+    emptyClipboard:
+      "Clipboard text is empty or unreadable. The payload may be too large for this browser's clipboard read path.",
+    largeClipboardCopied:
+      "Copied envelope to local clipboard, but this browser may not be able to paste text this large.",
     largePayload:
       "The operation failed. The file may be too large for this browser, clipboard, or sync path.",
     unsupportedBrowser:
@@ -755,19 +760,26 @@
     }
     setBusy(true);
     try {
-      setStatus(
-        state.config.mode === CONFIG_ENCRYPTED_MODE
-          ? "Encrypting file..."
-          : "Encoding envelope...",
-        "progress",
-      );
-      await nextFrame();
-      const envelope = await buildEnvelope(state.loaded.bytes, state.loaded.file);
+      let envelope = state.loaded.envelope;
+      if (!envelope) {
+        setStatus(
+          state.config.mode === CONFIG_ENCRYPTED_MODE
+            ? "Encrypting file..."
+            : "Encoding envelope...",
+          "progress",
+        );
+        await nextFrame();
+        envelope = await buildEnvelope(state.loaded.bytes, state.loaded.file);
+      }
       setStatus("Writing clipboard...", "progress");
       await nextFrame();
       await navigator.clipboard.writeText(envelope);
       state.loaded.envelope = envelope;
-      setStatus("Copied envelope to local clipboard.", "success");
+      if (envelope.length >= BROWSER_TEXT_CLIPBOARD_READ_LIMIT_CHARS) {
+        setStatus(messages.largeClipboardCopied, "warning");
+      } else {
+        setStatus("Copied envelope to local clipboard.", "success");
+      }
     } catch (_error) {
       preserveStateError(messages.clipboardWrite);
     } finally {
@@ -784,6 +796,9 @@
       setStatus("Reading clipboard...", "progress");
       await nextFrame();
       const text = await navigator.clipboard.readText();
+      if (text.length === 0) {
+        throw new FileClipError(messages.emptyClipboard);
+      }
       setStatus("Validating clipboard payload...", "progress");
       await nextFrame();
       const loaded = await hydrateEnvelope(text);
