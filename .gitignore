@@ -16,3 +16,4 @@ dev/sessions
 # Local files and scratch work
 local/
 dev/docs/requirements.md
+AGENT.md

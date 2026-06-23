@@ -19,6 +19,8 @@ Establish the package shape, dependency set, and test baseline before adding beh
 - [ ] CORE-04 Keep Typer as the CLI framework and wire the `fileclip` console script to the real CLI entry point.
 - [ ] CORE-05 Add a minimal pytest baseline that verifies the package imports and the CLI app can be constructed.
 - [ ] CORE-06 Add static asset directories and placeholder `index.html`, `app.css`, and `app.js` files under `src/fileclip/static/`.
+- [ ] CORE-07 Configure package data so `index.html`, `app.css`, and `app.js` are included in built distributions.
+- [ ] CORE-08 Choose the frontend verification approach before frontend implementation; prefer Python pytest with Playwright unless project constraints require a different harness.
 
 ## Phase 1: CLI Launch Behavior
 
@@ -30,10 +32,14 @@ Implement the local launch command and make loopback-only operation the safe def
 - [ ] CLI-04 Support `--open / --no-open` with browser launch enabled by default.
 - [ ] CLI-05 Support `--passphrase TEXT` to enable encrypted mode.
 - [ ] CLI-06 Support `--passphrase-prompt` as a safer launch-time input path.
-- [ ] CLI-07 Reject non-loopback bind addresses unless an explicit remote-bind override is added later.
+- [ ] CLI-07 Reject non-loopback bind addresses for the initial implementation.
 - [ ] CLI-08 Ensure passphrases, envelopes, and file payloads are never logged by CLI code.
 - [ ] CLI-09 Add CLI tests for default options, explicit host/port options, browser-open toggles, and passphrase mode selection.
 - [ ] CLI-10 Add CLI tests that verify remote bind addresses are refused by default.
+- [ ] CLI-11 Implement reliable automatic port selection by pre-binding a socket or otherwise discovering the assigned uvicorn port before browser launch.
+- [ ] CLI-12 Add tests for `--port 0` URL generation and browser launch behavior.
+- [ ] CLI-13 Reject using `--passphrase` and `--passphrase-prompt` together.
+- [ ] CLI-14 Reject empty passphrases in encrypted mode.
 
 ## Phase 2: Local Server And Launch Configuration
 
@@ -47,6 +53,8 @@ Build the FastAPI host that serves only the app shell, static files, and launch 
 - [ ] SERV-06 Prevent access-log or application-log output from including passphrases or config response bodies.
 - [ ] SERV-07 Add server tests for `/`, static asset serving, plain-mode config, and encrypted-mode config.
 - [ ] SERV-08 Add a server test or regression check that there are no upload routes or file persistence paths.
+- [ ] SERV-09 Return `Cache-Control: no-store` for `/config.json`.
+- [ ] SERV-10 Add a regression test that encrypted-mode config is not cacheable.
 
 ## Phase 3: Browser App Shell And State Machine
 
@@ -80,17 +88,21 @@ Deliver the plain-mode round trip for one dropped file.
 - [ ] ENV-01 Define constants for prefix `FILECLIP/1:`, protected-header kind, schema `1`, and mode `plain-base64`.
 - [ ] ENV-02 Implement plain-mode protected-header creation with `kind`, `schema`, `mode`, `createdUtc`, and file metadata.
 - [ ] ENV-03 Implement plain-mode envelope serialization with strict container fields `protectedB64` and `payloadB64`.
+- [ ] DROP-00 Reject multi-file drops with a clear `Drop one file at a time` message instead of silently selecting the first file.
 - [ ] DROP-01 Accept exactly one dropped file at a time and replace the current loaded state on successful drop.
 - [ ] DROP-02 Read dropped file bytes in the browser and capture name, MIME type, size, and SHA-256.
 - [ ] DROP-03 Build a plain `FILECLIP/1` envelope after a successful drop when the app is in plain mode.
 - [ ] COPY-01 Enable copy only after a valid loaded state exists.
 - [ ] COPY-02 Write the current envelope text to the clipboard from the copy button handler.
 - [ ] COPY-03 Report clipboard write success and failure without corrupting loaded state.
+- [ ] COPY-04 Report copy success as copied to the local clipboard without implying a remote machine has received it.
 - [ ] DL-01 Enable download only after a valid loaded state exists.
 - [ ] DL-02 Download loaded bytes through a Blob URL using the sanitized original filename.
 - [ ] DL-03 Revoke Blob URLs after use or replacement.
 - [ ] ENV-04 Add tests for plain envelope serialization and strict container shape.
 - [ ] DROP-04 Add browser/manual checks for drop, copy, and download in plain mode.
+- [ ] DROP-05 Use `application/octet-stream` when the browser does not provide a MIME type.
+- [ ] DROP-06 Add a browser/manual check for dropping file A, then file B in the same app instance; file B must become the active file for UI metadata, copy, and download.
 
 ## Phase 6: Clipboard Paste And Plain Hydration
 
@@ -137,6 +149,7 @@ Harden the user-facing behavior around expected browser, clipboard, and payload 
 - [ ] ERR-04 Ensure large-payload failures show the documented large-payload message when possible.
 - [ ] ERR-05 Confirm invalid operations never log envelope contents, payload bytes, or passphrases.
 - [ ] ERR-06 Add tests or browser checks for clipboard read failure, clipboard write failure, malformed payloads, and unsupported API paths where practical.
+- [ ] ERR-07 Ensure long-running browser operations yield visible progress/status and do not leave the UI in a misleading ready state.
 
 ## Phase 9: Documentation And Verification
 
@@ -146,11 +159,14 @@ Prepare the project for practical use and future implementation sessions.
 - [ ] DOC-02 Add user-facing troubleshooting docs for clipboard permission errors, browser support, large payload limits, and passphrase mismatch.
 - [ ] DOC-03 Update development docs if implementation choices diverge from the requirements or design specification.
 - [ ] DOC-04 Add a concise manual verification checklist mapped to the acceptance tests in `dev/docs/requirements.md`.
+- [ ] DOC-05 Document that `--passphrase-prompt` avoids shell-history and process-list exposure but does not prevent the browser from receiving the passphrase through local launch config.
+- [ ] DOC-06 Document that encrypted mode protects payload bytes but does not hide envelope metadata such as filename, MIME type, size, or SHA-256.
 - [ ] QA-01 Run the full Python test suite with `uv run pytest`.
 - [ ] QA-02 Run any configured frontend or browser checks.
 - [ ] QA-03 Perform manual plain-mode drop/copy/paste/download verification.
 - [ ] QA-04 Perform manual encrypted-mode drop/copy/paste/download verification.
 - [ ] QA-05 Build the package with `uv build` and confirm the console script is present.
+- [ ] QA-06 Install the built wheel in a clean environment and verify the static UI can be served.
 
 ## Future Work
 
